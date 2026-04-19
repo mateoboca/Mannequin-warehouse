@@ -1,0 +1,60 @@
+using UnityEngine;
+
+[RequireComponent(typeof(CharacterController))]
+public class SimplePlayerController : MonoBehaviour
+{
+    public float speed = 5f;
+    public float mouseSensitivity = 2f;
+    public Transform playerCamera;
+
+    private float xRotation = 0f;
+    private CharacterController cc;
+
+    void Start()
+    {
+        cc = GetComponent<CharacterController>();
+        Cursor.lockState = CursorLockMode.Locked;
+        Cursor.visible = false;
+    }
+
+    void Update()
+    {
+        if (Time.timeScale == 0f) return;
+
+        float mouseX = Input.GetAxis("Mouse X") * mouseSensitivity;
+        float mouseY = Input.GetAxis("Mouse Y") * mouseSensitivity;
+
+        xRotation -= mouseY;
+        xRotation = Mathf.Clamp(xRotation, -90f, 90f);
+        if (playerCamera != null) playerCamera.localRotation = Quaternion.Euler(xRotation, 0f, 0f);
+
+        transform.Rotate(Vector3.up * mouseX);
+
+        float x = Input.GetAxis("Horizontal");
+        float z = Input.GetAxis("Vertical");
+
+        Vector3 move = transform.right * x + transform.forward * z;
+        cc.Move(move * speed * Time.deltaTime);
+
+        if (Input.GetKeyDown(KeyCode.E))
+        {
+            RaycastHit hit;
+            if (Physics.Raycast(playerCamera.position, playerCamera.forward, out hit, 3f))
+            {
+                if (hit.collider.CompareTag("Fusible"))
+                {
+                    FusibleInteractable fusible = hit.collider.GetComponent<FusibleInteractable>();
+                    if (fusible != null && !fusible.yaRecolectado)
+                    {
+                        fusible.ActivarFusible();
+                        GameManager.Instancia.RecolectarFusible();
+                    }
+                }
+                else if (hit.collider.CompareTag("Puerta"))
+                {
+                    GameManager.Instancia.IntentarAbrirPuerta();
+                }
+            }
+        }
+    }
+}
