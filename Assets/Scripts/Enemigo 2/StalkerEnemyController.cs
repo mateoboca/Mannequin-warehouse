@@ -24,20 +24,27 @@ public class StalkerEnemyController : MonoBehaviour
     private float pursueTimer = 0f;
     private float freezeTimer = 0f;
 
+    private Animator animator;
+
     private void Awake()
     {
         agent = GetComponent<NavMeshAgent>();
+        animator = GetComponent<Animator>();
         ChangeState(EnemyState.Patrol);
     }
 
     private void Update()
     {
+        animator.SetFloat("Speed", agent.velocity.magnitude * 2f);
         UpdateState();
+        Debug.Log("Estado: " + currentState);
+        Debug.Log("Frozen param: " + animator.GetBool("Frozen"));
     }
 
     public void ChangeState(EnemyState newState)
     {
         currentState = newState;
+        animator.SetBool("Frozen", false);
 
         switch (currentState)
         {
@@ -55,8 +62,11 @@ public class StalkerEnemyController : MonoBehaviour
                 agent.isStopped = true;
                 agent.velocity = Vector3.zero;
                 freezeTimer = freezeDuration;
+                animator.SetBool("Frozen", true);
                 break;
             case EnemyState.Attack:
+                agent.isStopped = true;
+                animator.SetTrigger("Attack");
                 SceneManager.LoadScene(SceneManager.GetActiveScene().name);
                 break;
         }
