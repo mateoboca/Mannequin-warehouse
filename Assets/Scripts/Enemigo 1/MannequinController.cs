@@ -23,10 +23,14 @@ public class MannequinController : MonoBehaviour
 
     private float wanderTimer = 0f;
 
+    private Animator animator;
     private void Awake()
     {
         agent = GetComponent<NavMeshAgent>();
+        animator = GetComponent<Animator>();
+
         ChangeState(EnemyState.Patrol);
+        animator.SetFloat("Speed", agent.velocity.magnitude);
     }
 
     private void Update()
@@ -43,6 +47,7 @@ public class MannequinController : MonoBehaviour
     public void ChangeState(EnemyState newState)
     {
         currentState = newState;
+        animator.SetBool("Frozen", false);
 
         switch (currentState)
         {
@@ -63,8 +68,12 @@ public class MannequinController : MonoBehaviour
             case EnemyState.Frozen:
                 agent.isStopped = true;
                 agent.velocity = Vector3.zero;
+                animator.SetBool("Frozen", true);
                 break;
             case EnemyState.Attack:
+                agent.isStopped = true;
+                animator.SetTrigger("Attack");
+
                 SceneManager.LoadScene(SceneManager.GetActiveScene().name);
                 break;
         }
