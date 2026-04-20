@@ -10,6 +10,8 @@ public class SimplePlayerController : MonoBehaviour
     private float xRotation = 0f;
     private CharacterController cc;
 
+    private Vector3 velocity;
+ 
     void Start()
     {
         cc = GetComponent<CharacterController>();
@@ -29,6 +31,11 @@ public class SimplePlayerController : MonoBehaviour
         if (playerCamera != null) playerCamera.localRotation = Quaternion.Euler(xRotation, 0f, 0f);
 
         transform.Rotate(Vector3.up * mouseX);
+
+        if (cc.isGrounded && velocity.y < 0)
+        {
+            velocity.y = -2f;
+        }
 
         float x = Input.GetAxis("Horizontal");
         float z = Input.GetAxis("Vertical");
