@@ -1,6 +1,6 @@
 using UnityEngine;
 using TMPro;
-using UnityEngine.SceneManagement; // Agregamos esto para poder cambiar de escena
+using UnityEngine.SceneManagement; 
 
 public class GameManager : MonoBehaviour
 {
@@ -11,14 +11,13 @@ public class GameManager : MonoBehaviour
     public GameObject panelVictoria;
 
     [Header("Menú de Pausa")]
-    public GameObject panelPausa; // Arrastrar el PanelPausa acá
+    public GameObject panelPausa;
 
     public int fusiblesRecolectados = 0;
     private int fusiblesTotales = 5;
 
-    // Variables de control
     private bool juegoPausado = false;
-    private bool juegoTerminado = false; // Evita que pauses si ya ganaste
+    private bool juegoTerminado = false; 
 
     private void Awake()
     {
@@ -30,7 +29,6 @@ public class GameManager : MonoBehaviour
         ActualizarUI();
     }
 
-    // NUEVO: Escuchamos la tecla ESC todo el tiempo
     private void Update()
     {
         if (Input.GetKeyDown(KeyCode.Escape) && !juegoTerminado)
@@ -46,15 +44,12 @@ public class GameManager : MonoBehaviour
         }
     }
 
-    // --- LÓGICA DE PAUSA ---
-
     public void Pausar()
     {
         juegoPausado = true;
         panelPausa.SetActive(true);
-        Time.timeScale = 0f; // Congela todo (jugador, enemigo, partículas)
+        Time.timeScale = 0f;
 
-        // Liberamos el mouse para poder hacer clic en los botones
         Cursor.lockState = CursorLockMode.None;
         Cursor.visible = true;
     }
@@ -63,24 +58,18 @@ public class GameManager : MonoBehaviour
     {
         juegoPausado = false;
         panelPausa.SetActive(false);
-        Time.timeScale = 1f; // Descongela el tiempo
+        Time.timeScale = 1f;
 
-        // Volvemos a bloquear el mouse para el juego en primera persona
         Cursor.lockState = CursorLockMode.Locked;
         Cursor.visible = false;
     }
 
     public void VolverAlMenu()
     {
-        // ¡TRUCO CLAVE! Hay que descongelar el tiempo antes de cambiar de escena
-        // Si no, el menú principal va a cargar con el tiempo congelado y nada va a funcionar.
         Time.timeScale = 1f;
-
-        // Poné el nombre exacto de tu escena del menú acá:
         SceneManager.LoadScene("MenuPrincipal");
     }
 
-    // --- LÓGICA DE FUSIBLES (Se mantiene igual) ---
 
     public void RecolectarFusible()
     {
@@ -100,7 +89,7 @@ public class GameManager : MonoBehaviour
     {
         if (fusiblesRecolectados >= fusiblesTotales)
         {
-            juegoTerminado = true; // Bloquea el botón ESC
+            juegoTerminado = true; 
             panelVictoria.SetActive(true);
 
             Cursor.lockState = CursorLockMode.None;
