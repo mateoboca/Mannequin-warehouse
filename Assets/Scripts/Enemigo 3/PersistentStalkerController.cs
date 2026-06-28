@@ -18,18 +18,40 @@ public class PersistentStalkerController : MonoBehaviour
     public float killDistance = 1.2f;
 
     [HideInInspector] public NavMeshAgent agent;
+    private Animator animator;
 
     private void Awake()
     {
         agent = GetComponent<NavMeshAgent>();
+        animator = GetComponent<Animator>();
         ChangeState(EnemyState.Tracking);
     }
 
     private void Update()
     {
         UpdateState();
+        UpdateAnimator();
     }
 
+    private void UpdateAnimator()
+    {
+        if (animator == null) return;
+
+        switch (currentState)
+        {
+            case EnemyState.Tracking:
+                animator.SetFloat("Speed", 0.3f);
+                break;
+
+            case EnemyState.Chasing:
+                animator.SetFloat("Speed", 1f);
+                break;
+
+            case EnemyState.Attack:
+                animator.SetFloat("Speed", 0f);
+                break;
+        }
+    }
     public void ChangeState(EnemyState newState)
     {
         currentState = newState;
@@ -67,17 +89,13 @@ public class PersistentStalkerController : MonoBehaviour
         {
             case EnemyState.Tracking:
                 if (canSeePlayer)
-                {
                     ChangeState(EnemyState.Chasing);
-                }
                 agent.SetDestination(player.position);
                 break;
 
             case EnemyState.Chasing:
                 if (!canSeePlayer)
-                {
                     ChangeState(EnemyState.Tracking);
-                }
                 agent.SetDestination(player.position);
                 break;
         }
