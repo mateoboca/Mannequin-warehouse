@@ -1,4 +1,5 @@
 using UnityEngine;
+using TMPro;
 
 [RequireComponent(typeof(CharacterController))]
 public class SimplePlayerController : MonoBehaviour
@@ -7,16 +8,21 @@ public class SimplePlayerController : MonoBehaviour
     public float mouseSensitivity = 2f;
     public Transform playerCamera;
 
+    [Header("UI Interacción")]
+    public GameObject interactPrompt;
+
     private float xRotation = 0f;
     private CharacterController cc;
-
     private Vector3 velocity;
- 
+
     void Start()
     {
         cc = GetComponent<CharacterController>();
         Cursor.lockState = CursorLockMode.Locked;
         Cursor.visible = false;
+
+        if (interactPrompt != null)
+            interactPrompt.SetActive(false);
     }
 
     void Update()
@@ -28,39 +34,40 @@ public class SimplePlayerController : MonoBehaviour
 
         xRotation -= mouseY;
         xRotation = Mathf.Clamp(xRotation, -90f, 90f);
-        if (playerCamera != null) playerCamera.localRotation = Quaternion.Euler(xRotation, 0f, 0f);
+        if (playerCamera != null)
+            playerCamera.localRotation = Quaternion.Euler(xRotation, 0f, 0f);
 
         transform.Rotate(Vector3.up * mouseX);
 
         if (cc.isGrounded && velocity.y < 0)
-        {
             velocity.y = -2f;
-        }
 
         float x = Input.GetAxis("Horizontal");
         float z = Input.GetAxis("Vertical");
-
         Vector3 move = transform.right * x + transform.forward * z;
         cc.Move(move * speed * Time.deltaTime);
 
-        if (Input.GetKeyDown(KeyCode.E))
+        RaycastHit hit;
+        bool lookingAtInteractable = Physics.Raycast(playerCamera.position, playerCamera.forward, out hit, 3f)
+                                     && (hit.collider.CompareTag("Fusible") || hit.collider.CompareTag("Puerta"));
+
+        if (interactPrompt != null)
+            interactPrompt.SetActive(lookingAtInteractable);
+
+        if (Input.GetKeyDown(KeyCode.E) && lookingAtInteractable)
         {
-            RaycastHit hit;
-            if (Physics.Raycast(playerCamera.position, playerCamera.forward, out hit, 3f))
+            if (hit.collider.CompareTag("Fusible"))
             {
-                if (hit.collider.CompareTag("Fusible"))
+                FusibleInteractable fusible = hit.collider.GetComponent<FusibleInteractable>();
+                if (fusible != null && !fusible.yaRecolectado)
                 {
-                    FusibleInteractable fusible = hit.collider.GetComponent<FusibleInteractable>();
-                    if (fusible != null && !fusible.yaRecolectado)
-                    {
-                        fusible.ActivarFusible();
-                        GameManager.Instancia.RecolectarFusible();
-                    }
+                    fusible.ActivarFusible();
+                    GameManager.Instancia.RecolectarFusible();
                 }
-                else if (hit.collider.CompareTag("Puerta"))
-                {
-                    GameManager.Instancia.IntentarAbrirPuerta();
-                }
+            }
+            else if (hit.collider.CompareTag("Puerta"))
+            {
+                GameManager.Instancia.IntentarAbrirPuerta();
             }
         }
     }
