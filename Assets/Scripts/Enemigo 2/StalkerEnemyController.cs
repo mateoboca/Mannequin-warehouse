@@ -36,6 +36,8 @@ public class StalkerEnemyController : MonoBehaviour
     private int waypointIndex = 0;
     private float recalculateTimer = 0f;
 
+    private readonly List<Node> _neighbourBuffer = new List<Node>();
+
     private Animator animator;
 
     private void Awake()
@@ -168,7 +170,7 @@ public class StalkerEnemyController : MonoBehaviour
         List<Node> nodePath = AStarPathfinder.Run(
             startNode,
             node => node == goalNode,
-            node => node.neightbourds,
+            node => GetValidNeighbours(node),
             (a, b) => Vector3.Distance(a.transform.position, b.transform.position),
             node => Vector3.Distance(node.transform.position, goalNode.transform.position)
         );
@@ -187,6 +189,19 @@ public class StalkerEnemyController : MonoBehaviour
 
         currentPath.Add(destination);
         agent.SetDestination(currentPath[waypointIndex]);
+    }
+    private List<Node> GetValidNeighbours(Node node)
+    {
+        _neighbourBuffer.Clear();
+        if (node == null || node.neightbourds == null)
+            return _neighbourBuffer;
+
+        foreach (Node n in node.neightbourds)
+        {
+            if (n != null && n.transform != null)
+                _neighbourBuffer.Add(n);
+        }
+        return _neighbourBuffer;
     }
 
     private void FollowPath()
